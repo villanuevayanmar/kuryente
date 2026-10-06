@@ -1,247 +1,224 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Electric Bill Calculator</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="A calm Philippine-peso electric bill calculator that remembers your past readings." />
+  <title>Kuryente · Electric Bill Calculator (₱)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
-<div class="wrap">
+  <div class="page">
 
-  <!-- TOP BAR -->
-  <header class="topbar">
-    <div class="brand">
-      <div class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M13 2 L4 14 H11 L10 22 L20 10 H13 Z"/>
-        </svg>
-      </div>
-      <div>
-        <div class="brand-name">Kuryente</div>
-        <div class="brand-sub">Electric Bill Calculator · ₱ PHP</div>
-      </div>
-    </div>
-    <div class="topbar-right">
-      <span class="pill"><span class="dot"></span><span id="storageStatus">Saved locally</span></span>
-    </div>
-  </header>
-
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-card">
-      <div class="eyebrow">Home energy · monthly</div>
-      <h1 class="hero-title">Track your<br/><em>electric bill</em><br/>without the math.</h1>
-      <p class="hero-lead">Type your meter readings, set a rate per kilowatt-hour in Philippine pesos, and the bill calculates itself. Your past readings are stored in this browser so you can pick up where you left off.</p>
-    </div>
-    <div class="kpi-card">
-      <div>
-        <div class="card-head" style="margin-bottom: 12px;">
-          <div>
-            <h2 style="margin:0;">At a glance</h2>
-            <div class="sub">Live counters across all saved readings</div>
-          </div>
-        </div>
-        <div class="kpi-grid">
-          <div class="kpi">
-            <div class="kpi-label">Months tracked</div>
-            <div class="kpi-value" id="kpiMonths">0</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Total kWh</div>
-            <div class="kpi-value teal" id="kpiKwh">0<span class="kpi-unit">kWh</span></div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Total billed</div>
-            <div class="kpi-value accent" id="kpiBill">₱0</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Avg. / month</div>
-            <div class="kpi-value" id="kpiAvg">₱0</div>
-          </div>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2 L4 14 H11 L10 22 L20 10 H13 Z" />
+          </svg>
+        </span>
+        <div class="brand-text">
+          <h1 class="brand-name">Kuryente</h1>
+          <p class="brand-sub">Electric Bill Calculator · ₱ PHP</p>
         </div>
       </div>
-    </div>
-  </section>
+      <div class="topbar-right">
+        <span class="pill" id="statusPill">
+          <span class="pill-dot"></span>
+          <span id="statusText">Saved on this device</span>
+        </span>
+      </div>
+    </header>
 
-  <!-- MAIN GRID -->
-  <section class="grid">
-
-    <!-- CALCULATOR CARD -->
-    <div class="card" aria-labelledby="calc-heading">
-      <div class="card-head">
+    <!-- CALCULATOR -->
+    <section class="calc card" aria-labelledby="calc-h">
+      <div class="calc-head">
         <div>
-          <h2 id="calc-heading">Calculate this month</h2>
-          <div class="sub">Fill in the readings and your peso rate. Save to add this entry to history.</div>
+          <h2 id="calc-h">Calculate this month</h2>
+          <p class="muted">Type your meter readings and your peso rate. The total bills itself as you type.</p>
+        </div>
+
+        <!-- edit banner; visible only when editing -->
+        <div class="edit-banner" id="editBanner" hidden>
+          <span class="edit-banner-dot"></span>
+          <span>Editing reading from <strong id="editBannerDate">—</strong></span>
+          <button class="edit-banner-close" type="button" id="editCancel" aria-label="Cancel edit">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 L6 18 M6 6 l12 12"/></svg>
+          </button>
         </div>
       </div>
 
       <form id="calcForm" novalidate>
         <div class="form-grid">
-          <div class="field">
-            <label class="label" for="f_date">
-              Billing date
-            </label>
+          <label class="field">
+            <span class="label">Billing date</span>
             <input class="input" type="date" id="f_date" required />
-          </div>
+          </label>
 
-          <div class="field">
-            <label class="label" for="f_label">
-              Label <span class="text-affix-note">(optional)</span>
-            </label>
-            <input class="input" type="text" id="f_label" placeholder="e.g. October 2026" maxlength="40" />
-          </div>
+          <label class="field">
+            <span class="label">Label <span class="hint">(optional)</span></span>
+            <input class="input" type="text" id="f_label" placeholder="e.g. October 2026" maxlength="40" autocomplete="off" />
+          </label>
 
-          <div class="field">
-            <label class="label" for="f_prev">
+          <label class="field">
+            <span class="label">
               Previous reading
-              <span class="label-tag" id="autoPrevTag" style="display:none;">auto</span>
-            </label>
-            <div class="input-wrap">
-              <input class="input num has-affix-right" type="number" id="f_prev" inputmode="decimal" step="0.01" min="0" placeholder="0.00" />
-              <span class="input-affix right">kWh</span>
+              <span class="pill-tag" id="autoPrevTag" hidden>auto</span>
+            </span>
+            <div class="input-affix-wrap">
+              <input class="input num has-suffix" type="number" inputmode="decimal" step="0.01" min="0" id="f_prev" placeholder="leave blank to charge full reading" />
+              <span class="suffix">kWh</span>
             </div>
-            <div class="text-affix-note" id="prevNote">Leave blank to charge the entire current reading.</div>
-          </div>
+          </label>
 
-          <div class="field">
-            <label class="label" for="f_curr">Current reading</label>
-            <div class="input-wrap">
-              <input class="input num has-affix-right" type="number" id="f_curr" inputmode="decimal" step="0.01" min="0" placeholder="0.00" required />
-              <span class="input-affix right">kWh</span>
+          <label class="field">
+            <span class="label">Current reading</span>
+            <div class="input-affix-wrap">
+              <input class="input num has-suffix" type="number" inputmode="decimal" step="0.01" min="0" id="f_curr" placeholder="0.00" required />
+              <span class="suffix">kWh</span>
             </div>
-          </div>
+          </label>
 
-          <div class="field">
-            <label class="label" for="f_rate">Rate per kWh</label>
-            <div class="input-wrap">
-              <span class="input-affix left">₱</span>
-              <input class="input num has-affix-left has-affix-right" type="number" id="f_rate" inputmode="decimal" step="0.01" min="0" placeholder="0.00" required />
-              <span class="input-affix right">/ kWh</span>
+          <label class="field">
+            <span class="label">Rate per kWh</span>
+            <div class="input-affix-wrap">
+              <span class="prefix">₱</span>
+              <input class="input num has-prefix has-suffix" type="number" inputmode="decimal" step="0.01" min="0" id="f_rate" placeholder="0.00" required />
+              <span class="suffix">/kWh</span>
             </div>
-          </div>
+          </label>
 
-          <div class="field">
-            <label class="label" for="f_other">Other charges <span class="text-affix-note">(taxes / fees, optional)</span></label>
-            <div class="input-wrap">
-              <span class="input-affix left">₱</span>
-              <input class="input num has-affix-left" type="number" id="f_other" inputmode="decimal" step="0.01" min="0" value="0" />
+          <label class="field">
+            <span class="label">Other charges <span class="hint">(taxes, fees)</span></span>
+            <div class="input-affix-wrap">
+              <span class="prefix">₱</span>
+              <input class="input num has-prefix" type="number" inputmode="decimal" step="0.01" min="0" id="f_other" value="0" />
             </div>
-          </div>
+          </label>
         </div>
 
-        <!-- LIVE PREVIEW -->
+        <!-- live preview -->
         <div class="preview" aria-live="polite">
-          <div class="preview-block hero-block">
-            <div class="preview-label">Estimated bill</div>
-            <div><span class="preview-num hero" id="prevTotal">₱0.00</span></div>
+          <div class="preview-main">
+            <span class="preview-label">Estimated bill</span>
+            <span class="preview-total" id="prevTotal">₱0.00</span>
           </div>
-          <div class="preview-block">
-            <div class="preview-label">Usage this period</div>
-            <div><span class="preview-num" id="prevUsage">0</span><span class="preview-unit">kWh</span></div>
-            <div style="margin-top: 6px; font-size: 12px; color: rgba(252,250,246,.55);" id="prevFormula">—</div>
+          <div class="preview-side">
+            <div class="preview-line">
+              <span class="preview-mini-label">Used this period</span>
+              <span class="preview-mini-val"><span id="prevUsage">0</span> <em>kWh</em></span>
+            </div>
+            <div class="preview-line">
+              <span class="preview-mini-label">Formula</span>
+              <span class="preview-mini-val" id="prevFormula">—</span>
+            </div>
           </div>
         </div>
+
+        <p class="form-error" id="formError" hidden></p>
 
         <div class="actions">
-          <button class="btn btn-accent" type="submit">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
-            Save to history
+          <button class="btn btn-primary" type="submit" id="btnSubmit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" id="btnSubmitIcon"><path d="M5 12l5 5L20 7"/></svg>
+            <span id="btnSubmitLabel">Save reading</span>
+          </button>
+          <button class="btn btn-ghost" type="button" id="btnUseLast" hidden>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+            Use last reading
           </button>
           <button class="btn btn-ghost" type="button" id="btnReset">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
-            Reset
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            Clear
           </button>
-          <button class="btn btn-ghost" type="button" id="btnExport">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+          <button class="btn btn-link" type="button" id="btnExport">
             Export JSON
           </button>
         </div>
       </form>
-    </div>
+    </section>
 
-    <!-- HISTORY CARD -->
-    <div class="card" aria-labelledby="hist-heading">
-      <div class="card-head">
+    <!-- HISTORY -->
+    <section class="card history-card" aria-labelledby="hist-h">
+      <header class="section-head">
         <div>
-          <h2 id="hist-heading">History</h2>
-          <div class="sub">Click any row to reuse its reading as your new previous.</div>
+          <h2 id="hist-h">Saved readings</h2>
+          <p class="muted">Click <strong>Edit</strong> to fix a saved reading. Click <strong>Use as previous</strong> to restart from that reading.</p>
         </div>
-        <button class="btn btn-danger btn-sm" type="button" id="btnClearAll">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-          Clear all
-        </button>
-      </div>
-
-      <div class="history-filters" role="tablist">
-        <button class="seg active" data-filter="all" type="button">All</button>
-        <button class="seg" data-filter="year" type="button">This year</button>
-        <button class="seg" data-filter="recent" type="button">Last 6</button>
-      </div>
+        <div class="head-controls">
+          <div class="seg" role="tablist" aria-label="filter">
+            <button class="seg-btn active" data-filter="all" type="button">All</button>
+            <button class="seg-btn" data-filter="year" type="button">This year</button>
+            <button class="seg-btn" data-filter="recent" type="button">Recent 6</button>
+          </div>
+          <button class="btn btn-danger btn-sm" type="button" id="btnClearAll">Clear all</button>
+        </div>
+      </header>
 
       <div id="historyHost"></div>
-    </div>
-  </section>
+    </section>
 
-  <!-- CHART -->
-  <section class="chart-card">
-    <div class="chart-head">
-      <div>
-        <h2>Usage trend</h2>
-        <div class="sub" style="font-size:13px;color:var(--muted);margin-top:4px;">kWh and ₱ over time</div>
+    <!-- STATS + CHART in a 2-col layout -->
+    <section class="row stats-chart">
+      <div class="card stats-card" aria-labelledby="stats-h">
+        <h2 id="stats-h" class="visually-hidden">Total summary</h2>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-label">Months tracked</span>
+            <span class="stat-value" id="statMonths">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Total kWh used</span>
+            <span class="stat-value teal" id="statKwh">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Total billed</span>
+            <span class="stat-value accent" id="statBill">₱0.00</span>
+          </div>
+        </div>
       </div>
-      <div class="chart-legend">
-        <span><span class="swatch kwh"></span> kWh</span>
-        <span><span class="swatch bill"></span> ₱</span>
-      </div>
-    </div>
-    <div id="chartHost"></div>
-  </section>
 
-  <!-- TIPS -->
-  <section class="help-row">
-    <div class="tip">
-      <div class="tip-num">1</div>
-      <div>
-        <div class="tip-title">Read your meter</div>
-        <div class="tip-text">Type the numbers exactly as shown on the meter face. Most residential meters show one decimal.</div>
+      <div class="card chart-card" aria-labelledby="chart-h">
+        <header class="section-head tight">
+          <div>
+            <h2 id="chart-h">Trend</h2>
+            <p class="muted">kWh and ₱ over time</p>
+          </div>
+          <div class="legend">
+            <span><span class="swatch teal"></span> kWh</span>
+            <span><span class="swatch accent"></span> ₱</span>
+          </div>
+        </header>
+        <div id="chartHost"></div>
       </div>
-    </div>
-    <div class="tip">
-      <div class="tip-num">2</div>
-      <div>
-        <div class="tip-title">Save each month</div>
-        <div class="tip-text">After saving, your previous reading is auto-set, so next month you only type the new reading.</div>
+    </section>
+
+    <footer class="footnote">
+      <p>All readings are stored in this browser via <code>localStorage</code>. Nothing leaves your device. Use <strong>Export JSON</strong> for a backup.</p>
+    </footer>
+  </div>
+
+  <!-- toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span class="toast-dot"></span>
+    <span id="toastMsg">Saved</span>
+  </div>
+
+  <!-- confirm modal -->
+  <div class="modal-backdrop" id="modalBg" role="dialog" aria-modal="true">
+    <div class="modal">
+      <h3 id="modalTitle">Are you sure?</h3>
+      <p id="modalText">This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="modalCancel" type="button">Cancel</button>
+        <button class="btn btn-danger" id="modalOk" type="button">Confirm</button>
       </div>
-    </div>
-    <div class="tip">
-      <div class="tip-num">3</div>
-      <div>
-        <div class="tip-title">Browse anytime</div>
-        <div class="tip-text">Click any past entry to set it as your next starting point. All data stays on this device.</div>
-      </div>
-    </div>
-  </section>
-
-  <div class="footnote">Stored in this browser via localStorage. No data leaves your device. Clear your browser storage to wipe everything.</div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast" role="status" aria-live="polite">
-  <span class="dot"></span><span id="toastMsg">Saved</span>
-</div>
-
-<!-- CONFIRM MODAL -->
-<div class="modal-backdrop" id="modalBg" role="dialog" aria-modal="true">
-  <div class="modal">
-    <h3 id="modalTitle">Clear all history?</h3>
-    <p id="modalText">This will permanently remove every saved reading from this browser. This cannot be undone.</p>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" id="modalCancel" type="button">Cancel</button>
-      <button class="btn btn-danger" id="modalOk" type="button">Yes, clear</button>
     </div>
   </div>
-</div>
-  <script src="script.js"></script>
+
+  <script src="app.js" defer></script>
 </body>
 </html>
